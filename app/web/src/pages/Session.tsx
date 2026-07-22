@@ -1,2 +1,89 @@
-import {useEffect,useState} from 'react';import {request} from '../services/api';
-export function Session(){const [seconds,setSeconds]=useState(0),[running,setRunning]=useState(false),[message,setMessage]=useState('');useEffect(()=>{if(!running)return;const id=setInterval(()=>setSeconds(s=>s+1),1000);return()=>clearInterval(id)},[running]);async function submit(e:React.FormEvent<HTMLFormElement>){e.preventDefault();const f=new FormData(e.currentTarget);await request('/sessions',{method:'POST',body:JSON.stringify({durationMinutes:Math.max(1,Math.ceil(seconds/60)),task:f.get('task'),predictedConfidence:Number(f.get('confidence')),outcome:f.get('outcome'),reflection:f.get('reflection')})});setMessage('Sessão registrada. A previsão agora pode ser comparada ao resultado.')}return <><header><div><p className="eyebrow">ROTINA DE 60 MINUTOS</p><h1>Sessão de estudo</h1><p>Recupere primeiro. Consulte depois.</p></div></header><div className="grid session"><section className="card timer"><span>CRONÔMETRO</span><strong>{String(Math.floor(seconds/60)).padStart(2,'0')}:{String(seconds%60).padStart(2,'0')}</strong><button onClick={()=>setRunning(!running)}>{running?'Pausar':'Iniciar'}</button></section><form className="card form" onSubmit={submit}><label>Tarefa<input name="task" required placeholder="Ex.: refazer 0217 sem consulta"/></label><label>Confiança prevista <input name="confidence" type="range" min="0" max="100" defaultValue="50"/></label><label>Resultado<select name="outcome"><option value="SUCCESS">Sucesso</option><option value="PARTIAL">Parcial</option><option value="FAILURE">Falha</option></select></label><label>Reflexão<textarea name="reflection" placeholder="Qual era o invariante? Onde errei?"/></label><button type="submit">Registrar sessão</button>{message&&<p className="success">{message}</p>}</form></div></>}
+import { useEffect, useState } from "react";
+import { request } from "../services/api";
+export function Session() {
+  const [seconds, setSeconds] = useState(0),
+    [running, setRunning] = useState(false),
+    [message, setMessage] = useState("");
+  useEffect(() => {
+    if (!running) return;
+    const id = setInterval(() => setSeconds((s) => s + 1), 1000);
+    return () => clearInterval(id);
+  }, [running]);
+  async function submit(e: React.FormEvent<HTMLFormElement>) {
+    e.preventDefault();
+    const f = new FormData(e.currentTarget);
+    await request("/sessions", {
+      method: "POST",
+      body: JSON.stringify({
+        durationMinutes: Math.max(1, Math.ceil(seconds / 60)),
+        task: f.get("task"),
+        predictedConfidence: Number(f.get("confidence")),
+        outcome: f.get("outcome"),
+        reflection: f.get("reflection"),
+      }),
+    });
+    setMessage(
+      "Sessão registrada. A previsão agora pode ser comparada ao resultado.",
+    );
+  }
+  return (
+    <>
+      <header>
+        <div>
+          <p className="eyebrow">ROTINA DE 60 MINUTOS</p>
+          <h1>Sessão de estudo</h1>
+          <p>Recupere primeiro. Consulte depois.</p>
+        </div>
+      </header>
+      <div className="grid session">
+        <section className="card timer">
+          <span>CRONÔMETRO</span>
+          <strong>
+            {String(Math.floor(seconds / 60)).padStart(2, "0")}:
+            {String(seconds % 60).padStart(2, "0")}
+          </strong>
+          <button onClick={() => setRunning(!running)}>
+            {running ? "Pausar" : "Iniciar"}
+          </button>
+        </section>
+        <form className="card form" onSubmit={submit}>
+          <label>
+            Tarefa
+            <input
+              name="task"
+              required
+              placeholder="Ex.: refazer 0217 sem consulta"
+            />
+          </label>
+          <label>
+            Confiança prevista{" "}
+            <input
+              name="confidence"
+              type="range"
+              min="0"
+              max="100"
+              defaultValue="50"
+            />
+          </label>
+          <label>
+            Resultado
+            <select name="outcome">
+              <option value="SUCCESS">Sucesso</option>
+              <option value="PARTIAL">Parcial</option>
+              <option value="FAILURE">Falha</option>
+            </select>
+          </label>
+          <label>
+            Reflexão
+            <textarea
+              name="reflection"
+              placeholder="Qual era o invariante? Onde errei?"
+            />
+          </label>
+          <button type="submit">Registrar sessão</button>
+          {message && <p className="success">{message}</p>}
+        </form>
+      </div>
+    </>
+  );
+}

@@ -1,9 +1,145 @@
-import{describe,expect,it}from'vitest';import{buildRoadmap,type RoadmapDefinition,type TopicEvidence}from'../src/domain/roadmap.js';
-const definition:RoadmapDefinition={version:1,chapters:[{id:1,title:'Base',subtitle:'',gate:[]},{id:2,title:'Linear',subtitle:'',gate:['arrays']},{id:3,title:'Trees',subtitle:'',gate:['stack','queue']}],topics:[
-  {id:'arrays',chapter:1,order:1,scenario:'s',question:'q',choices:['a','b'],reveal:'r',uses:[],signals:[],problems:[1,2,3]},
-  {id:'stack',chapter:2,order:1,scenario:'s',question:'q',choices:['a','b'],reveal:'r',uses:[],signals:[],problems:[1,2,3]},
-  {id:'queue',chapter:2,order:2,scenario:'s',question:'q',choices:['a','b'],reveal:'r',uses:[],signals:[],problems:[1,2,3]},
-  {id:'tree',chapter:3,order:1,scenario:'s',question:'q',choices:['a','b'],reveal:'r',uses:[],signals:[],problems:[1,2,3]}
-]};const prerequisites={arrays:[],stack:['arrays'],queue:['arrays'],tree:['stack','queue']};
-function evidence(values:Record<string,Partial<TopicEvidence&{explored:boolean}>>={}){return Object.fromEntries(Object.keys(prerequisites).map(id=>[id,{score:0,diagnosticPassed:false,studiedRecently:false,explored:false,...values[id]}]))}
-describe('roadmap',()=>{it('abre apenas o desbravamento inicial, sem reforço',()=>{const map=buildRoadmap(definition,evidence(),prerequisites);expect(map.recommendedExplore?.id).toBe('arrays');expect(map.chapters[0].nodes[0].reinforcementStatus).toBe('LOCKED');expect(map.chapters[2].nodes[0].explorationStatus).toBe('LOCKED')});it('desbravamento abre reforço mas não dá pontos',()=>{const map=buildRoadmap(definition,evidence({arrays:{explored:true}}),prerequisites);expect(map.weakest.map(x=>x.id)).toEqual(['arrays']);expect(map.chapters[0].nodes[0].score).toBe(0)});it('nota ou diagnóstico abre novas fronteiras',()=>{const byScore=buildRoadmap(definition,evidence({arrays:{score:40,explored:true}}),prerequisites);expect(byScore.chapters[1].nodes.map(x=>x.explorationStatus)).toEqual(['AVAILABLE','AVAILABLE']);const byDiagnostic=buildRoadmap(definition,evidence({arrays:{diagnosticPassed:true,explored:true}}),prerequisites);expect(byDiagnostic.chapters[1].nodes[0].explorationStatus).toBe('AVAILABLE')});it('exclui reforço recente quando há alternativa',()=>{const map=buildRoadmap(definition,evidence({arrays:{score:40,explored:true},stack:{explored:true,studiedRecently:true},queue:{explored:true}}),prerequisites);expect(map.randomPool.map(x=>x.id)).toEqual(['queue'])});it('não libera árvore antes de pilha e fila',()=>{const map=buildRoadmap(definition,evidence({arrays:{score:40,explored:true},stack:{score:40,explored:true}}),prerequisites);expect(map.chapters[2].nodes[0].missingPrerequisites).toContain('queue')})});
+import { describe, expect, it } from "vitest";
+import {
+  buildRoadmap,
+  type RoadmapDefinition,
+  type TopicEvidence,
+} from "../src/domain/roadmap.js";
+const definition: RoadmapDefinition = {
+  version: 1,
+  chapters: [
+    { id: 1, title: "Base", subtitle: "", gate: [] },
+    { id: 2, title: "Linear", subtitle: "", gate: ["arrays"] },
+    { id: 3, title: "Trees", subtitle: "", gate: ["stack", "queue"] },
+  ],
+  topics: [
+    {
+      id: "arrays",
+      chapter: 1,
+      order: 1,
+      scenario: "s",
+      question: "q",
+      choices: ["a", "b"],
+      reveal: "r",
+      uses: [],
+      signals: [],
+      problems: [1, 2, 3],
+    },
+    {
+      id: "stack",
+      chapter: 2,
+      order: 1,
+      scenario: "s",
+      question: "q",
+      choices: ["a", "b"],
+      reveal: "r",
+      uses: [],
+      signals: [],
+      problems: [1, 2, 3],
+    },
+    {
+      id: "queue",
+      chapter: 2,
+      order: 2,
+      scenario: "s",
+      question: "q",
+      choices: ["a", "b"],
+      reveal: "r",
+      uses: [],
+      signals: [],
+      problems: [1, 2, 3],
+    },
+    {
+      id: "tree",
+      chapter: 3,
+      order: 1,
+      scenario: "s",
+      question: "q",
+      choices: ["a", "b"],
+      reveal: "r",
+      uses: [],
+      signals: [],
+      problems: [1, 2, 3],
+    },
+  ],
+};
+const prerequisites = {
+  arrays: [],
+  stack: ["arrays"],
+  queue: ["arrays"],
+  tree: ["stack", "queue"],
+};
+function evidence(
+  values: Record<string, Partial<TopicEvidence & { explored: boolean }>> = {},
+) {
+  return Object.fromEntries(
+    Object.keys(prerequisites).map((id) => [
+      id,
+      {
+        score: 0,
+        diagnosticPassed: false,
+        studiedRecently: false,
+        explored: false,
+        ...values[id],
+      },
+    ]),
+  );
+}
+describe("roadmap", () => {
+  it("abre apenas o desbravamento inicial, sem reforço", () => {
+    const map = buildRoadmap(definition, evidence(), prerequisites);
+    expect(map.recommendedExplore?.id).toBe("arrays");
+    expect(map.chapters[0].nodes[0].reinforcementStatus).toBe("LOCKED");
+    expect(map.chapters[2].nodes[0].explorationStatus).toBe("LOCKED");
+  });
+  it("desbravamento abre reforço mas não dá pontos", () => {
+    const map = buildRoadmap(
+      definition,
+      evidence({ arrays: { explored: true } }),
+      prerequisites,
+    );
+    expect(map.weakest.map((x) => x.id)).toEqual(["arrays"]);
+    expect(map.chapters[0].nodes[0].score).toBe(0);
+  });
+  it("nota ou diagnóstico abre novas fronteiras", () => {
+    const byScore = buildRoadmap(
+      definition,
+      evidence({ arrays: { score: 40, explored: true } }),
+      prerequisites,
+    );
+    expect(byScore.chapters[1].nodes.map((x) => x.explorationStatus)).toEqual([
+      "AVAILABLE",
+      "AVAILABLE",
+    ]);
+    const byDiagnostic = buildRoadmap(
+      definition,
+      evidence({ arrays: { diagnosticPassed: true, explored: true } }),
+      prerequisites,
+    );
+    expect(byDiagnostic.chapters[1].nodes[0].explorationStatus).toBe(
+      "AVAILABLE",
+    );
+  });
+  it("exclui reforço recente quando há alternativa", () => {
+    const map = buildRoadmap(
+      definition,
+      evidence({
+        arrays: { score: 40, explored: true },
+        stack: { explored: true, studiedRecently: true },
+        queue: { explored: true },
+      }),
+      prerequisites,
+    );
+    expect(map.randomPool.map((x) => x.id)).toEqual(["queue"]);
+  });
+  it("não libera árvore antes de pilha e fila", () => {
+    const map = buildRoadmap(
+      definition,
+      evidence({
+        arrays: { score: 40, explored: true },
+        stack: { score: 40, explored: true },
+      }),
+      prerequisites,
+    );
+    expect(map.chapters[2].nodes[0].missingPrerequisites).toContain("queue");
+  });
+});

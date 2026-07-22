@@ -1,2 +1,56 @@
-import {describe,it,expect} from 'vitest';import{calculateScore}from'../src/domain/score.js';
-describe('calculateScore',()=>{it('começa em zero sem evidência',()=>{expect(calculateScore({verifiedProblemIds:[],independentRetrievals:0,independentSolutions:0,transferSuccesses:0,completeExplanations:0}).score).toBe(0)});it('exige todas as evidências para 100',()=>{expect(calculateScore({verifiedProblemIds:[1,2,3,4,5],independentRetrievals:3,independentSolutions:5,transferSuccesses:1,completeExplanations:5})).toMatchObject({score:100,breadth:20,retrieval:30,independence:25,transfer:15,explanation:10})});it('não duplica amplitude pelo mesmo problema',()=>{expect(calculateScore({verifiedProblemIds:[1,1,1],independentRetrievals:0,independentSolutions:0,transferSuccesses:0,completeExplanations:0}).breadth).toBe(4)});it('aplica falha sem sair dos limites',()=>{expect(calculateScore({verifiedProblemIds:[],independentRetrievals:0,independentSolutions:0,transferSuccesses:0,completeExplanations:0,latestFailure:'retrieval'}).score).toBe(0)})});
+import { describe, it, expect } from "vitest";
+import { calculateScore } from "../src/domain/score.js";
+describe("calculateScore", () => {
+  it("começa em zero sem evidência", () => {
+    expect(
+      calculateScore({
+        verifiedProblemIds: [],
+        independentRetrievals: 0,
+        independentSolutions: 0,
+        transferSuccesses: 0,
+        completeExplanations: 0,
+      }).score,
+    ).toBe(0);
+  });
+  it("exige todas as evidências para 100", () => {
+    expect(
+      calculateScore({
+        verifiedProblemIds: [1, 2, 3, 4, 5],
+        independentRetrievals: 3,
+        independentSolutions: 5,
+        transferSuccesses: 1,
+        completeExplanations: 5,
+      }),
+    ).toMatchObject({
+      score: 100,
+      breadth: 20,
+      retrieval: 30,
+      independence: 25,
+      transfer: 15,
+      explanation: 10,
+    });
+  });
+  it("não duplica amplitude pelo mesmo problema", () => {
+    expect(
+      calculateScore({
+        verifiedProblemIds: [1, 1, 1],
+        independentRetrievals: 0,
+        independentSolutions: 0,
+        transferSuccesses: 0,
+        completeExplanations: 0,
+      }).breadth,
+    ).toBe(4);
+  });
+  it("aplica falha sem sair dos limites", () => {
+    expect(
+      calculateScore({
+        verifiedProblemIds: [],
+        independentRetrievals: 0,
+        independentSolutions: 0,
+        transferSuccesses: 0,
+        completeExplanations: 0,
+        latestFailure: "retrieval",
+      }).score,
+    ).toBe(0);
+  });
+});

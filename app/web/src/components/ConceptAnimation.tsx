@@ -1,4 +1,57 @@
-export function ConceptAnimation({kind}:{kind:string}){
-  const graph=/tree|graph|bst/.test(kind),flow=/stack|queue|linked|recursion/.test(kind),decision=/dynamic|greedy|backtracking|binary-search|bit/.test(kind);
-  return <figure className={`concept-animation ${graph?'graph':flow?'flow':decision?'decision':'linear'}`} aria-label="Visualização conceitual"><svg viewBox="0 0 360 100" role="img"><title>Modelo visual do conceito</title>{graph?<><path className="edge" d="M180 15 95 78M180 15l85 63M95 78l-42 12m42-12 42 12m128-12-42 12m42-12 42 12"/><circle className="node pulse" cx="180" cy="15" r="9"/><circle className="node" cx="95" cy="78" r="8"/><circle className="node" cx="265" cy="78" r="8"/></>:flow?<><rect className="block move" x="40" y="36" width="42" height="28"/><rect className="block" x="125" y="36" width="42" height="28"/><rect className="block" x="210" y="36" width="42" height="28"/><path className="arrow" d="M20 50h310"/></>:decision?<><path className="edge" d="M35 50h90l45-32 45 32h110"/><path className="edge alt" d="M125 50l45 32 45-32"/><circle className="node pulse" cx="170" cy="18" r="8"/><circle className="node" cx="170" cy="82" r="8"/></>:<><rect className="block" x="35" y="36" width="52" height="28"/><rect className="block move" x="105" y="36" width="52" height="28"/><rect className="block" x="175" y="36" width="52" height="28"/><rect className="block" x="245" y="36" width="52" height="28"/><path className="scanner" d="M20 18v64"/></>}</svg><figcaption>Não memorize o desenho: explique a regra que ele torna visível.</figcaption></figure>
+export function ConceptAnimation({ kind }: { kind: string }) {
+  const graph = /tree|graph|bst/.test(kind),
+    flow = /stack|queue|linked|recursion/.test(kind),
+    decision = /dynamic|greedy|backtracking|binary-search|bit/.test(kind);
+  return (
+    <figure
+      className={`concept-animation ${graph ? "graph" : flow ? "flow" : decision ? "decision" : "linear"}`}
+      aria-label="Visualização conceitual"
+    >
+      <svg viewBox="0 0 360 100" role="img">
+        <title>Modelo visual do conceito</title>
+        {graph ? (
+          <>
+            <path
+              className="edge"
+              d="M180 15 95 78M180 15l85 63M95 78l-42 12m42-12 42 12m128-12-42 12m42-12 42 12"
+            />
+            <circle className="node pulse" cx="180" cy="15" r="9" />
+            <circle className="node" cx="95" cy="78" r="8" />
+            <circle className="node" cx="265" cy="78" r="8" />
+          </>
+        ) : flow ? (
+          <>
+            <rect className="block move" x="40" y="36" width="42" height="28" />
+            <rect className="block" x="125" y="36" width="42" height="28" />
+            <rect className="block" x="210" y="36" width="42" height="28" />
+            <path className="arrow" d="M20 50h310" />
+          </>
+        ) : decision ? (
+          <>
+            <path className="edge" d="M35 50h90l45-32 45 32h110" />
+            <path className="edge alt" d="M125 50l45 32 45-32" />
+            <circle className="node pulse" cx="170" cy="18" r="8" />
+            <circle className="node" cx="170" cy="82" r="8" />
+          </>
+        ) : (
+          <>
+            <rect className="block" x="35" y="36" width="52" height="28" />
+            <rect
+              className="block move"
+              x="105"
+              y="36"
+              width="52"
+              height="28"
+            />
+            <rect className="block" x="175" y="36" width="52" height="28" />
+            <rect className="block" x="245" y="36" width="52" height="28" />
+            <path className="scanner" d="M20 18v64" />
+          </>
+        )}
+      </svg>
+      <figcaption>
+        Não memorize o desenho: explique a regra que ele torna visível.
+      </figcaption>
+    </figure>
+  );
 }
