@@ -1,2 +1,9 @@
 main
 main.cpp
+node_modules/
+dist/
+.env
+coverage/
+*.log
+*.tsbuildinfo
+.DS_Store

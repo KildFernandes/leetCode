@@ -1,0 +1,9 @@
+{
+  "name": "leetcode-mastery",
+  "private": true,
+  "workspaces": ["app/api", "app/web"],
+  "scripts": {
+    "test": "npm run test -w app/api && npm run test -w app/web",
+    "build": "npm run build -w app/api && npm run build -w app/web"
+  }
+}

@@ -1,0 +1,212 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum ProblemStatus {
+  UNVERIFIED
+  LEARNING
+  VERIFIED
+  MASTERED
+}
+
+enum Outcome {
+  SUCCESS
+  PARTIAL
+  FAILURE
+}
+
+enum Difficulty {
+  EASY
+  MEDIUM
+  HARD
+  UNKNOWN
+}
+
+enum ProblemOrigin {
+  LOCAL
+  PLANNED
+}
+
+enum SelectionMode {
+  ROADMAP
+  WEAKEST
+  RANDOM
+  MANUAL
+}
+
+enum RoutineBlock {
+  RETRIEVAL
+  PRACTICE
+  EXPLANATION
+  RECORD
+}
+
+model Competency {
+  id String @id
+  name String
+  group String
+  description String
+  prerequisites String[]
+  problemLinks ProblemCompetency[]
+  snapshots ScoreSnapshot[]
+  challenges Challenge[]
+  studySessions StudySession[]
+  explorations TopicExploration[]
+  createdAt DateTime @default(now())
+}
+
+model Problem {
+  id Int @id
+  name String
+  filePath String? @unique
+  origin ProblemOrigin @default(LOCAL)
+  leetcodeUrl String?
+  difficulty Difficulty @default(UNKNOWN)
+  status ProblemStatus @default(UNVERIFIED)
+  competencies ProblemCompetency[]
+  attempts Attempt[]
+  reviews Review[]
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model ProblemCompetency {
+  problemId Int
+  competencyId String
+  weight Float @default(1)
+  problem Problem @relation(fields: [problemId], references: [id], onDelete: Cascade)
+  competency Competency @relation(fields: [competencyId], references: [id], onDelete: Cascade)
+  @@id([problemId, competencyId])
+}
+
+model Attempt {
+  id String @id @default(cuid())
+  problemId Int
+  problem Problem @relation(fields: [problemId], references: [id])
+  occurredAt DateTime @default(now())
+  outcome Outcome
+  durationMinutes Int
+  usedHint Boolean @default(false)
+  usedSolution Boolean @default(false)
+  implementationCorrect Boolean @default(false)
+  complexityCorrect Boolean @default(false)
+  edgeCasesCorrect Boolean @default(false)
+  explanationPattern Boolean @default(false)
+  explanationInvariant Boolean @default(false)
+  explanationAlternative Boolean @default(false)
+  explanationEdgeCase Boolean @default(false)
+  complexity String?
+  notes String?
+  errorTags AttemptErrorTag[]
+}
+
+model ErrorTag {
+  id String @id
+  name String
+  attempts AttemptErrorTag[]
+}
+
+model AttemptErrorTag {
+  attemptId String
+  errorTagId String
+  attempt Attempt @relation(fields: [attemptId], references: [id], onDelete: Cascade)
+  errorTag ErrorTag @relation(fields: [errorTagId], references: [id])
+  @@id([attemptId, errorTagId])
+}
+
+model Review {
+  id String @id @default(cuid())
+  problemId Int
+  problem Problem @relation(fields: [problemId], references: [id])
+  dueAt DateTime
+  intervalIndex Int @default(0)
+  completedAt DateTime?
+  outcome Outcome?
+  independent Boolean?
+  createdAt DateTime @default(now())
+}
+
+model Challenge {
+  id String @id
+  title String
+  description String
+  competencyId String
+  competency Competency @relation(fields: [competencyId], references: [id])
+  mixedCompetencies String[]
+  attempts ChallengeAttempt[]
+}
+
+model ChallengeAttempt {
+  id String @id @default(cuid())
+  challengeId String
+  challenge Challenge @relation(fields: [challengeId], references: [id])
+  outcome Outcome
+  usedHint Boolean @default(false)
+  reflection String?
+  occurredAt DateTime @default(now())
+}
+
+model StudySession {
+  id String @id @default(cuid())
+  startedAt DateTime @default(now())
+  durationMinutes Int
+  task String
+  predictedConfidence Int
+  outcome Outcome
+  reflection String?
+  competencyId String?
+  competency Competency? @relation(fields: [competencyId], references: [id])
+  selectionMode SelectionMode?
+  routineBlock RoutineBlock?
+}
+
+model TopicExploration {
+  id String @id @default(cuid())
+  competencyId String @unique
+  competency Competency @relation(fields: [competencyId], references: [id])
+  prediction String
+  reflection String?
+  startedAt DateTime @default(now())
+  // Mantém o marco das explorações feitas antes da Prova de Presença.
+  legacyCompletedAt DateTime?
+  completedAt DateTime?
+  responses ExplorationResponse[]
+}
+
+enum ExplorationAssessment {
+  RECOVERED
+  PARTIAL
+  MISSED
+}
+
+model ExplorationResponse {
+  id String @id @default(cuid())
+  explorationId String
+  exploration TopicExploration @relation(fields: [explorationId], references: [id], onDelete: Cascade)
+  promptId String
+  answer String
+  revealedAt DateTime?
+  assessment ExplorationAssessment?
+  assessedAt DateTime?
+  @@unique([explorationId, promptId])
+}
+
+model ScoreSnapshot {
+  id String @id @default(cuid())
+  competencyId String
+  competency Competency @relation(fields: [competencyId], references: [id])
+  score Int
+  breadth Int
+  retrieval Int
+  independence Int
+  transfer Int
+  explanation Int
+  reason String
+  createdAt DateTime @default(now())
+  @@index([competencyId, createdAt])
+}

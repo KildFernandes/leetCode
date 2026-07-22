@@ -1,0 +1,48 @@
+services:
+  postgres:
+    image: postgres:16-alpine
+    environment:
+      POSTGRES_DB: ${POSTGRES_DB:-leetcode_mastery}
+      POSTGRES_USER: ${POSTGRES_USER:-leetcode}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-leetcode_local}
+    ports:
+      - "${POSTGRES_PORT:-5432}:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-leetcode} -d ${POSTGRES_DB:-leetcode_mastery}"]
+      interval: 5s
+      timeout: 5s
+      retries: 12
+
+  api:
+    build:
+      context: .
+      dockerfile: app/api/Dockerfile
+    environment:
+      DATABASE_URL: ${DATABASE_URL:-postgresql://leetcode:leetcode_local@postgres:5432/leetcode_mastery?schema=public}
+      API_PORT: 3000
+      SOLUTIONS_ROOT: /workspace/algorithms
+      LEARNING_ROOT: /workspace/learning
+    volumes:
+      - ./algorithms:/workspace/algorithms:ro
+      - ./learning:/workspace/learning:ro
+    ports:
+      - "${API_PORT:-3000}:3000"
+    depends_on:
+      postgres:
+        condition: service_healthy
+
+  web:
+    build:
+      context: .
+      dockerfile: app/web/Dockerfile
+      args:
+        VITE_API_URL: ${VITE_API_URL:-http://localhost:3000/api}
+    ports:
+      - "${WEB_PORT:-5173}:80"
+    depends_on:
+      - api
+
+volumes:
+  postgres_data:

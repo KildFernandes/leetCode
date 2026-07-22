@@ -1,0 +1,10 @@
+CREATE TYPE "ProblemOrigin" AS ENUM ('LOCAL','PLANNED');
+CREATE TYPE "SelectionMode" AS ENUM ('ROADMAP','WEAKEST','RANDOM','MANUAL');
+CREATE TYPE "RoutineBlock" AS ENUM ('RETRIEVAL','PRACTICE','EXPLANATION','RECORD');
+ALTER TABLE "Problem" ALTER COLUMN "filePath" DROP NOT NULL;
+ALTER TABLE "Problem" ADD COLUMN "origin" "ProblemOrigin" NOT NULL DEFAULT 'LOCAL';
+ALTER TABLE "Problem" ADD COLUMN "leetcodeUrl" TEXT;
+ALTER TABLE "StudySession" ADD COLUMN "competencyId" TEXT;
+ALTER TABLE "StudySession" ADD COLUMN "selectionMode" "SelectionMode";
+ALTER TABLE "StudySession" ADD COLUMN "routineBlock" "RoutineBlock";
+ALTER TABLE "StudySession" ADD CONSTRAINT "StudySession_competencyId_fkey" FOREIGN KEY ("competencyId") REFERENCES "Competency"("id") ON DELETE SET NULL;
